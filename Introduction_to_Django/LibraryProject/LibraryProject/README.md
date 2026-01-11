@@ -1,5 +1,3 @@
-# LibraryProject
-
 \# LibraryProject
 
 

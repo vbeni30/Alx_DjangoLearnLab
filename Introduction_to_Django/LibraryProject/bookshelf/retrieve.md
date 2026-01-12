@@ -1,13 +1,10 @@
-\## Create Book
-
-
+## Retrieve Book
 
 ```python
+from bookshelf.models import Book
 
-
-Book.objects.all().values()
-
-\# Output: <QuerySet \[{'id': 1, 'title': '1984', 'author': 'George Orwell', 'publication\_year': 1949}]>
-
-
-
+# Retrieve the book we just created
+book = Book.objects.get(title="1984")
+book
+# Expected Output:
+# <Book: 1984>

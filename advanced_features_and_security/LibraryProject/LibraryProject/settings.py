@@ -123,3 +123,23 @@ STATIC_URL = 'static/'
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
+
+
+# =========================
+# SECURITY SETTINGS
+# =========================
+
+# Prevent the browser from trying to guess content types
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Enable browser XSS filtering
+SECURE_BROWSER_XSS_FILTER = True
+
+# Prevent clickjacking
+X_FRAME_OPTIONS = 'DENY'
+
+# CSRF cookie only sent over HTTPS
+CSRF_COOKIE_SECURE = True
+
+# Session cookie only sent over HTTPS
+SESSION_COOKIE_SECURE = True

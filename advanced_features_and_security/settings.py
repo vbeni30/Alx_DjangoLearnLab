@@ -31,15 +31,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-     'accounts',  
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-        #'relationship_app',
-     'bookshelf',
+
+    'accounts',
+    'bookshelf',
 ]
 
 
@@ -121,5 +121,5 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 AUTH_USER_MODEL = 'accounts.CustomUser'
-AUTH_USER_MODEL = 'bookshelf.CustomUser'
+
 

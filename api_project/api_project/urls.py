@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
 URL configuration for api_project project.
 
@@ -20,3 +21,12 @@ from django.urls import path
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
+=======
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include('api.urls')),
+]
+>>>>>>> 1fe2090 (Add Book list API endpoint using DRF)

@@ -5,7 +5,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Book
 from .serializers import BookSerializer
 
-
 """
 BookListView:
 - GET /api/books/
@@ -25,7 +24,7 @@ class BookListView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     # Filtering + Search + Ordering
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     
     # Fields available for filtering
     filterset_fields = ['title', 'author__name', 'publication_year']

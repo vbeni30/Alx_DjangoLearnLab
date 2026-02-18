@@ -1,14 +1,23 @@
 from rest_framework import serializers
-from datetime import datetime
+from datetime import date
 from .models import Author, Book
 
+"""
+Serializers for the API application.
 
+This module defines how model instances are converted to JSON
+and vice versa, including validation and nested relationships.
 """
-BookSerializer:
-- Serializes all fields of the Book model.
-- Includes custom validation to prevent future publication years.
-"""
+
+
 class BookSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Book model.
+
+    Serializes all fields of the Book model.
+    Includes custom validation to ensure the publication year
+    is not set in the future.
+    """
 
     class Meta:
         model = Book
@@ -16,9 +25,11 @@ class BookSerializer(serializers.ModelSerializer):
 
     def validate_publication_year(self, value):
         """
-        Ensure publication year is not in the future.
+        Custom validation method.
+
+        Ensures the publication year is not in the future.
         """
-        current_year = datetime.now().year
+        current_year = date.today().year
         if value > current_year:
             raise serializers.ValidationError(
                 "Publication year cannot be in the future."
@@ -26,12 +37,18 @@ class BookSerializer(serializers.ModelSerializer):
         return value
 
 
-"""
-AuthorSerializer:
-- Serializes the Author model.
-- Includes nested serialization of related Book objects.
-"""
 class AuthorSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Author model.
+
+    Includes:
+    - name field
+    - nested list of related books using BookSerializer
+
+    The 'books' field dynamically serializes all books
+    related to the author using the related_name defined
+    in the Book model.
+    """
     books = BookSerializer(many=True, read_only=True)
 
     class Meta:

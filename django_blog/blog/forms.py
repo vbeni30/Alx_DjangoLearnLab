@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Tag
+from .models import Post
 
 
 class PostForm(forms.ModelForm):
@@ -19,7 +19,7 @@ class PostForm(forms.ModelForm):
         if tags_input:
             tag_names = [t.strip().lower() for t in tags_input.split(',')]
             for name in tag_names:
-                tag, created = Tag.objects.get_or_create(name=name)
+                tag, created = tag.objects.get_or_create(name=name)
                 instance.tags.add(tag)
 
         return instance

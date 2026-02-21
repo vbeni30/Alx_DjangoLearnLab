@@ -39,8 +39,7 @@ def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
+            login(request, form.get_user())
             return redirect('profile')
     else:
         form = AuthenticationForm()
@@ -109,8 +108,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return super().form_valid(form)
 
     def test_func(self):
-        post = self.get_object()
-        return self.request.user == post.author
+        return self.request.user == self.get_object().author
 
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -119,28 +117,25 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('post-list')
 
     def test_func(self):
-        post = self.get_object()
-        return self.request.user == post.author
+        return self.request.user == self.get_object().author
 
 
 # =============================
 # Comment Views (CRUD)
 # =============================
 
-@login_required
-def add_comment(request, pk):
-    post = get_object_or_404(Post, pk=pk)
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
 
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.author = request.user
-            comment.post = post
-            comment.save()
-            return redirect('post-detail', pk=post.pk)
+    def form_valid(self, form):
+        post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        form.instance.author = self.request.user
+        form.instance.post = post
+        return super().form_valid(form)
 
-    return redirect('post-detail', pk=post.pk)
+    def get_success_url(self):
+        return reverse('post-detail', kwargs={'pk': self.object.post.pk})
 
 
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -152,8 +147,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return reverse('post-detail', kwargs={'pk': self.object.post.pk})
 
     def test_func(self):
-        comment = self.get_object()
-        return self.request.user == comment.author
+        return self.request.user == self.get_object().author
 
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -164,5 +158,4 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return reverse('post-detail', kwargs={'pk': self.object.post.pk})
 
     def test_func(self):
-        comment = self.get_object()
-        return self.request.user == comment.author
+        return self.request.user == self.get_object().author

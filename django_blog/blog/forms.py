@@ -1,26 +1,25 @@
 from django import forms
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
-from .models import Comment
+from .models import Post, Tag
 
 
-class RegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+class PostForm(forms.ModelForm):
+    tags = forms.CharField(required=False, help_text="Comma separated tags")
 
     class Meta:
-        model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        model = Post
+        fields = ['title', 'content', 'tags']
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
 
-class UpdateUserForm(forms.ModelForm):
-    email = forms.EmailField(required=True)
+        if commit:
+            instance.save()
 
-    class Meta:
-        model = User
-        fields = ['username', 'email']
+        tags_input = self.cleaned_data.get('tags')
+        if tags_input:
+            tag_names = [t.strip().lower() for t in tags_input.split(',')]
+            for name in tag_names:
+                tag, created = Tag.objects.get_or_create(name=name)
+                instance.tags.add(tag)
 
-
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['content']
+        return instance

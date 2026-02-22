@@ -70,3 +70,16 @@ Covers:
 - like/unlike behavior
 - notification generation (follow/like/comment)
 - notifications list endpoint behavior
+
+## Deployment (Production)
+
+Production-ready deployment files are included:
+- `requirements.txt`
+- `Procfile`
+- `runtime.txt`
+- `build.sh`
+- `render.yaml`
+- `.env.example`
+
+Detailed deployment instructions:
+- `DEPLOYMENT.md`

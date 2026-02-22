@@ -3,7 +3,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 
-from .models import Post
+from notifications.models import Notification
+from .models import Post, Like
 
 User = get_user_model()
 
@@ -63,3 +64,61 @@ class FeedTests(APITestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class LikeUnlikeTests(APITestCase):
+    def setUp(self):
+        self.author = User.objects.create_user(username='author', password='pass12345')
+        self.liker = User.objects.create_user(username='liker', password='pass12345')
+        self.post = Post.objects.create(author=self.author, title='Post', content='Body')
+        self.client.force_authenticate(user=self.liker)
+
+    def test_like_post_creates_like_and_notification(self):
+        url = reverse('like-post', kwargs={'pk': self.post.pk})
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Like.objects.filter(post=self.post, user=self.liker).exists())
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.author,
+                actor=self.liker,
+                verb='liked your post',
+            ).exists()
+        )
+
+    def test_like_post_cannot_duplicate_like(self):
+        Like.objects.create(post=self.post, user=self.liker)
+        url = reverse('like-post', kwargs={'pk': self.post.pk})
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Like.objects.filter(post=self.post, user=self.liker).count(), 1)
+
+    def test_unlike_post_removes_like(self):
+        Like.objects.create(post=self.post, user=self.liker)
+        url = reverse('unlike-post', kwargs={'pk': self.post.pk})
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(Like.objects.filter(post=self.post, user=self.liker).exists())
+
+    def test_comment_creates_notification_for_post_author(self):
+        commenter = User.objects.create_user(username='commenter', password='pass12345')
+        self.client.force_authenticate(user=commenter)
+
+        url = reverse('comment-list')
+        response = self.client.post(
+            url,
+            data={'post': self.post.pk, 'content': 'Nice post'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.author,
+                actor=commenter,
+                verb='commented on your post',
+            ).exists()
+        )

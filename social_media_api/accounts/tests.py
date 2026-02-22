@@ -3,6 +3,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 
+from notifications.models import Notification
+
 User = get_user_model()
 
 
@@ -19,6 +21,13 @@ class FollowUnfollowTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.user2, self.user1.following.all())
         self.assertIn(self.user1, self.user2.followers.all())
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.user2,
+                actor=self.user1,
+                verb='started following you',
+            ).exists()
+        )
 
     def test_unfollow_user(self):
         self.user1.following.add(self.user2)

@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 
+from notifications.models import Notification
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 
 CustomUser = get_user_model()
@@ -63,7 +64,19 @@ class FollowUserView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if request.user.following.filter(id=user_to_follow.id).exists():
+            return Response(
+                {'detail': f'You already follow {user_to_follow.username}.'},
+                status=status.HTTP_200_OK,
+            )
+
         request.user.following.add(user_to_follow)
+        Notification.objects.create(
+            recipient=user_to_follow,
+            actor=request.user,
+            verb='started following you',
+            target=request.user,
+        )
         return Response(
             {'detail': f'You are now following {user_to_follow.username}.'},
             status=status.HTTP_200_OK,

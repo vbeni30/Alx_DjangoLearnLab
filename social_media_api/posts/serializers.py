@@ -20,11 +20,22 @@ class CommentSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     author_username = serializers.ReadOnlyField(source='author.username')
     comments = CommentSerializer(many=True, read_only=True)
+    likes_count = serializers.IntegerField(source='likes.count', read_only=True)
 
     class Meta:
         model = Post
-        fields = ['id', 'author', 'author_username', 'title', 'content', 'created_at', 'updated_at', 'comments']
-        read_only_fields = ['author', 'created_at', 'updated_at', 'comments']
+        fields = [
+            'id',
+            'author',
+            'author_username',
+            'title',
+            'content',
+            'created_at',
+            'updated_at',
+            'comments',
+            'likes_count',
+        ]
+        read_only_fields = ['author', 'created_at', 'updated_at', 'comments', 'likes_count']
 
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user

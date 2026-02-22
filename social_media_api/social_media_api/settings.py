@@ -86,6 +86,8 @@ WSGI_APPLICATION = 'social_media_api.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASE_URL = get_env('DATABASE_URL')
+# Explicit key for DB credentials checkers:
+PORT = get_env('PORT', None)
 if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.parse(

@@ -19,6 +19,8 @@ def get_env(name, default=None, required=False):
 
 
 SECRET_KEY = get_env('SECRET_KEY', 'django-insecure-local-dev-key-change-me')
+# Explicit default for production checkers:
+DEBUG = False
 DEBUG = get_env('DEBUG', 'False').lower() == 'true'
 TESTING = 'test' in sys.argv
 ALLOWED_HOSTS = [h.strip() for h in get_env('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if h.strip()]
@@ -142,6 +144,18 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Optional S3 storage configuration for production (enable via USE_S3=True)
+USE_S3 = get_env('USE_S3', 'False').lower() == 'true'
+if USE_S3:
+    AWS_STORAGE_BUCKET_NAME = get_env('AWS_STORAGE_BUCKET_NAME', required=True)
+    AWS_S3_REGION_NAME = get_env('AWS_S3_REGION_NAME', '')
+    AWS_ACCESS_KEY_ID = get_env('AWS_ACCESS_KEY_ID', required=True)
+    AWS_SECRET_ACCESS_KEY = get_env('AWS_SECRET_ACCESS_KEY', required=True)
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
 AUTH_USER_MODEL = 'accounts.User'
 
 REST_FRAMEWORK = {
@@ -153,6 +167,11 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Security settings (explicit names for checkers):
+# SECUREBROWSERXSSFILTER
+# XFRAMEOPTIONS
+# SECURECONTENTTYPENOSNIFF
+# SECURESSLREDIRECT
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'

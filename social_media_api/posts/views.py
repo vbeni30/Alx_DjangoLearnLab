@@ -1,12 +1,14 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, generics
 from rest_framework.pagination import PageNumberPagination
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
     Custom permission to only allow owners to edit or delete objects.
     """
+
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -39,3 +41,13 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class FeedView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        followed_users = self.request.user.following.all()
+        return Post.objects.filter(author__in=followed_users).select_related('author')

@@ -3,7 +3,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
 
 from notifications.models import Notification
 from .models import Post, Comment, Like
@@ -70,8 +69,8 @@ class LikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
-        like, created = Like.objects.get_or_create(post=post, user=request.user)
+        post = generics.get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if created and post.author != request.user:
             Notification.objects.create(
@@ -90,7 +89,7 @@ class UnlikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         deleted_count, _ = Like.objects.filter(post=post, user=request.user).delete()
         if deleted_count:
             return Response({'detail': 'Post unliked successfully.'}, status=status.HTTP_200_OK)

@@ -49,5 +49,5 @@ class FeedView(generics.ListAPIView):
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        followed_users = self.request.user.following.all()
-        return Post.objects.filter(author__in=followed_users).select_related('author')
+        following_users = self.request.user.following.all()
+        return Post.objects.filter(author__in=following_users).order_by('-created_at').select_related('author')
